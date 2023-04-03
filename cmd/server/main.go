@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"os"
 
@@ -9,25 +8,47 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	log "github.com/sirupsen/logrus"
 )
 
 func Run() error {
+	log.SetFormatter(&log.JSONFormatter{})
+	log.Info("Setting up server...")
+
+	var err error
+
 	if err := godotenv.Load(); err != nil {
+		log.Error("failed to load env")
 		return err
 	}
 
-	db, err := db.NewDatabase()
+	store, err := db.NewDatabase()
 	if err != nil {
-		fmt.Println("failed to connect to the database")
+		log.Error("failed to connect to the database")
 		return err
 	}
 
-	if err := db.MigrateDB(); err != nil {
-		fmt.Println("failed to migrate database")
+	if err := store.MigrateDB(); err != nil {
+		log.Error("failed to migrate database")
 		return err
 	}
 
-	fmt.Println("successfully connected and pinged database")
+	log.Info("successfully connected and pinged database")
+
+	// cmtService := comment.NewService(store)
+
+	// cmtService.CreateComment(
+	// 	context.Background(),
+	// 	comment.Comment{
+	// 		Slug:   "manual-test",
+	// 		Body:   "Hello world!",
+	// 		Author: "Max",
+	// 	},
+	// )
+	// fmt.Println(cmtService.GetComment(
+	// 	context.Background(),
+	// 	"43e99d25-2139-4dd4-b099-efd23c923c97",
+	// ))
 
 	r := gin.Default()
 	r.GET("/ping", func(c *gin.Context) {
@@ -37,6 +58,7 @@ func Run() error {
 	})
 
 	if err := r.Run(":" + os.Getenv("PORT")); err != nil {
+		log.Error(err)
 		return err
 	}
 
@@ -45,6 +67,6 @@ func Run() error {
 
 func main() {
 	if err := Run(); err != nil {
-		fmt.Println(err)
+		log.Error(err)
 	}
 }

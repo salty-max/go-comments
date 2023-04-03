@@ -8,10 +8,11 @@ import (
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/lib/pq"
+	log "github.com/sirupsen/logrus"
 )
 
 func (d *Database) MigrateDB() error {
-	fmt.Println("migrating database...")
+	log.Info("migrating database...")
 
 	driver, err := postgres.WithInstance(d.Client.DB, &postgres.Config{})
 	if err != nil {
@@ -24,7 +25,7 @@ func (d *Database) MigrateDB() error {
 		driver,
 	)
 	if err != nil {
-		fmt.Println(err)
+		log.Error(err)
 		return err
 	}
 
@@ -34,7 +35,7 @@ func (d *Database) MigrateDB() error {
 		}
 	}
 
-	fmt.Println("successfully migrated database")
+	log.Info("successfully migrated database")
 
 	return nil
 }

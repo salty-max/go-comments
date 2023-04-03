@@ -3,11 +3,15 @@ package comment
 import (
 	"context"
 	"errors"
-	"fmt"
+
+	log "github.com/sirupsen/logrus"
 )
 
 var (
 	ErrFetchingComment = errors.New("failed to fetch comment by id")
+	ErrCreatingComment = errors.New("failed to create comment")
+	ErrUpdatingComment = errors.New("failed to update comment")
+	ErrDeletingComment = errors.New("failed to delete comment")
 	ErrNotImplemented  = errors.New("not implemented")
 )
 
@@ -25,7 +29,7 @@ type Comment struct {
 type Store interface {
 	GetComment(context.Context, string) (Comment, error)
 	CreateComment(context.Context, Comment) (Comment, error)
-	UpdateComment(context.Context, Comment) error
+	UpdateComment(context.Context, string, Comment) (Comment, error)
 	DeleteComment(context.Context, string) error
 }
 
@@ -43,10 +47,9 @@ func NewService(store Store) *Service {
 }
 
 func (s *Service) GetComment(ctx context.Context, id string) (Comment, error) {
-	fmt.Println("retrieving a comment")
 	cmt, err := s.Store.GetComment(ctx, id)
 	if err != nil {
-		fmt.Println(err)
+		log.Error(err)
 		return Comment{}, ErrFetchingComment
 	}
 
@@ -54,13 +57,25 @@ func (s *Service) GetComment(ctx context.Context, id string) (Comment, error) {
 }
 
 func (s *Service) CreateComment(ctx context.Context, cmt Comment) (Comment, error) {
-	return Comment{}, ErrNotImplemented
+	insertedCmt, err := s.Store.CreateComment(ctx, cmt)
+	if err != nil {
+		log.Error(err)
+		return Comment{}, ErrCreatingComment
+	}
+
+	return insertedCmt, nil
 }
 
-func (s *Service) UpdateComment(ctx context.Context, cmt Comment) error {
-	return ErrNotImplemented
+func (s *Service) UpdateComment(ctx context.Context, id string, cmt Comment) (Comment, error) {
+	updatedCmt, err := s.Store.UpdateComment(ctx, id, cmt)
+	if err != nil {
+		log.Error(err)
+		return Comment{}, ErrUpdatingComment
+	}
+
+	return updatedCmt, nil
 }
 
 func (s *Service) DeleteComment(ctx context.Context, id string) error {
-	return ErrNotImplemented
+	return s.Store.DeleteComment(ctx, id)
 }
