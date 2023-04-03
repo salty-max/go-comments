@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"os"
 
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
+	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 )
 
 type Database struct {
-	Client *gorm.DB
+	Client *sqlx.DB
 }
 
 func NewDatabase() (*Database, error) {
@@ -24,7 +24,7 @@ func NewDatabase() (*Database, error) {
 		os.Getenv("SSL_MODE"),
 	)
 
-	conn, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	conn, err := sqlx.Connect("postgres", dsn)
 	if err != nil {
 		return &Database{}, fmt.Errorf("could not connect to the database: %w", err)
 	}
@@ -35,11 +35,5 @@ func NewDatabase() (*Database, error) {
 }
 
 func (d *Database) Ping(ctx context.Context) error {
-	sqlDb, err := d.Client.DB()
-
-	if err != nil {
-		return fmt.Errorf("could not ping the database: %w", err)
-	}
-
-	return sqlDb.PingContext(ctx)
+	return d.Client.DB.PingContext(ctx)
 }
