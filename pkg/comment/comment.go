@@ -14,6 +14,8 @@ type Comment struct {
 	Author string
 }
 
+// Store - defines all methods that the service
+// needs in order to operate
 type Store interface {
 	GetComment(context.Context, string) (Comment, error)
 }
