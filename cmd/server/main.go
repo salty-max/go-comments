@@ -1,16 +1,16 @@
 package main
 
 import (
-	"net/http"
-	"os"
-
+	"github.com/salty-max/go-comments/pkg/comment"
 	db "github.com/salty-max/go-comments/pkg/database"
+	transportHttp "github.com/salty-max/go-comments/pkg/transport/http"
 
-	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	log "github.com/sirupsen/logrus"
 )
 
+// Run - is responsible for the instantiation
+// and startup of the app
 func Run() error {
 	log.SetFormatter(&log.JSONFormatter{})
 	log.Info("Setting up server...")
@@ -35,29 +35,10 @@ func Run() error {
 
 	log.Info("successfully connected and pinged database")
 
-	// cmtService := comment.NewService(store)
+	cmtService := comment.NewService(store)
 
-	// cmtService.CreateComment(
-	// 	context.Background(),
-	// 	comment.Comment{
-	// 		Slug:   "manual-test",
-	// 		Body:   "Hello world!",
-	// 		Author: "Max",
-	// 	},
-	// )
-	// fmt.Println(cmtService.GetComment(
-	// 	context.Background(),
-	// 	"43e99d25-2139-4dd4-b099-efd23c923c97",
-	// ))
-
-	r := gin.Default()
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "pong",
-		})
-	})
-
-	if err := r.Run(":" + os.Getenv("PORT")); err != nil {
+	httpHandler := transportHttp.NewHandler(cmtService)
+	if err := httpHandler.Serve(); err != nil {
 		log.Error(err)
 		return err
 	}

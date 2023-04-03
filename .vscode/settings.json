@@ -1,3 +1,14 @@
 {
   "editor.tabSize": 4,
+  "cSpell.language": "en,lorem",
+  "cSpell.enableFiletypes": [
+    "go.mod",
+    "go.sum"
+  ],
+  "cSpell.words": [
+    "godotenv",
+    "joho",
+    "logrus",
+    "sirupsen"
+  ],
 }
