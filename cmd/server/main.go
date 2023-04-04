@@ -9,6 +9,12 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+func init() {
+	if err := godotenv.Load(); err != nil {
+		log.Error("failed to load env")
+	}
+}
+
 // Run - is responsible for the instantiation
 // and startup of the app
 func Run() error {

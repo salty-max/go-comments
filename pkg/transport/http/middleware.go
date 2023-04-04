@@ -1,7 +1,11 @@
 package http
 
 import (
+	"context"
 	"net/http"
+	"os"
+	"strconv"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -24,5 +28,18 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 		).Info("handled request")
 
 		next.ServeHTTP(w, r)
+	})
+}
+
+func TimeOutMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		timeout_delay, err := strconv.ParseUint(os.Getenv("TIMEOUT_DELAY"), 10, 64)
+		if err != nil {
+			panic(err)
+		}
+
+		ctx, cancel := context.WithTimeout(r.Context(), time.Duration(timeout_delay)*time.Second)
+		defer cancel()
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

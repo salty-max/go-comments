@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/joho/godotenv"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -20,9 +19,6 @@ type Handler struct {
 }
 
 func NewHandler(service CommentService) *Handler {
-	if err := godotenv.Load(); err != nil {
-		log.Error("failed to load env")
-	}
 	h := &Handler{
 		Service: service,
 	}
@@ -31,6 +27,7 @@ func NewHandler(service CommentService) *Handler {
 	h.mapRoutes()
 	h.Router.Use(JSONMiddleWare)
 	h.Router.Use(LoggingMiddleware)
+	h.Router.Use(TimeOutMiddleware)
 
 	h.Server = http.Server{
 		Addr:    fmt.Sprintf("0.0.0.0:%s", os.Getenv("PORT")),
