@@ -20,3 +20,16 @@ tasks:
   stop:
     cmds:
       - docker-compose down
+
+  integration-test:
+    cmds:
+      - docker-compose up -d db
+      - go test -tags=integration -v ./...
+    env:
+      DB_USER: "postgres"
+      DB_PASSWORD: "postgres"
+      DB_DB: "postgres"
+      DB_HOST: "localhost"
+      DB_TABLE: "postgres"
+      DB_PORT: "1234"
+      SSL_MODE: "disable"

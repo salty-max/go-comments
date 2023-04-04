@@ -10,6 +10,7 @@
     "godotenv",
     "joho",
     "logrus",
-    "sirupsen"
+    "sirupsen",
+    "stretchr"
   ],
 }
