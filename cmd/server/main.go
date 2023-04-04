@@ -12,7 +12,6 @@ import (
 // Run - is responsible for the instantiation
 // and startup of the app
 func Run() error {
-	log.SetFormatter(&log.JSONFormatter{})
 	log.Info("Setting up server...")
 
 	var err error
