@@ -15,10 +15,26 @@ type Response struct {
 }
 
 type CommentService interface {
+	GetComments(context.Context) ([]comment.Comment, error)
 	CreateComment(context.Context, comment.Comment) (comment.Comment, error)
 	GetComment(context.Context, string) (comment.Comment, error)
 	UpdateComment(context.Context, string, comment.Comment) (comment.Comment, error)
 	DeleteComment(context.Context, string) error
+}
+
+func (h *Handler) GetComments(w http.ResponseWriter, r *http.Request) {
+	var cmts []comment.Comment
+
+	cmts, err := h.Service.GetComments(r.Context())
+	if err != nil {
+		log.Error(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	if err := json.NewEncoder(w).Encode(cmts); err != nil {
+		panic(err)
+	}
 }
 
 func (h *Handler) CreateComment(w http.ResponseWriter, r *http.Request) {

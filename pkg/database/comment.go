@@ -25,6 +25,34 @@ func convertRowToComment(c CommentRow) comment.Comment {
 	}
 }
 
+func (d *Database) GetComments(ctx context.Context) ([]comment.Comment, error) {
+	var cmtRow CommentRow
+	var comments []comment.Comment
+
+	rows, err := d.Client.QueryContext(
+		ctx,
+		`
+		SELECT id, slug, body, author FROM comments	
+		`,
+	)
+	if err != nil {
+		return []comment.Comment{}, fmt.Errorf("error fetching comments: %w", err)
+	}
+
+	for rows.Next() {
+		if err := rows.Scan(&cmtRow.ID, &cmtRow.Slug, &cmtRow.Body, &cmtRow.Author); err != nil {
+			return []comment.Comment{}, fmt.Errorf("error fetching comments: %w", err)
+		}
+		comments = append(comments, convertRowToComment(cmtRow))
+	}
+
+	if err := rows.Close(); err != nil {
+		return []comment.Comment{}, fmt.Errorf("failed to close rows: %w", err)
+	}
+
+	return comments, nil
+}
+
 func (d *Database) GetComment(ctx context.Context, uuid string) (comment.Comment, error) {
 	var cmtRow CommentRow
 

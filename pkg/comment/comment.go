@@ -8,11 +8,12 @@ import (
 )
 
 var (
-	ErrFetchingComment = errors.New("failed to fetch comment by id")
-	ErrCreatingComment = errors.New("failed to create comment")
-	ErrUpdatingComment = errors.New("failed to update comment")
-	ErrDeletingComment = errors.New("failed to delete comment")
-	ErrNotImplemented  = errors.New("not implemented")
+	ErrFetchingComments = errors.New("failed to fetch comments")
+	ErrFetchingComment  = errors.New("failed to fetch comment by id")
+	ErrCreatingComment  = errors.New("failed to create comment")
+	ErrUpdatingComment  = errors.New("failed to update comment")
+	ErrDeletingComment  = errors.New("failed to delete comment")
+	ErrNotImplemented   = errors.New("not implemented")
 )
 
 // Comment - a representation of the comment
@@ -27,6 +28,7 @@ type Comment struct {
 // Store - defines all methods that the service
 // needs in order to operate
 type Store interface {
+	GetComments(context.Context) ([]Comment, error)
 	GetComment(context.Context, string) (Comment, error)
 	CreateComment(context.Context, Comment) (Comment, error)
 	UpdateComment(context.Context, string, Comment) (Comment, error)
@@ -44,6 +46,16 @@ func NewService(store Store) *Service {
 	return &Service{
 		Store: store,
 	}
+}
+
+func (s *Service) GetComments(ctx context.Context) ([]Comment, error) {
+	cmts, err := s.Store.GetComments(ctx)
+	if err != nil {
+		log.Error(err)
+		return []Comment{}, ErrFetchingComments
+	}
+
+	return cmts, nil
 }
 
 func (s *Service) GetComment(ctx context.Context, id string) (Comment, error) {
