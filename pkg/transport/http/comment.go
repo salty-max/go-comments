@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 	"github.com/salty-max/go-comments/pkg/comment"
 	log "github.com/sirupsen/logrus"
@@ -12,6 +13,20 @@ import (
 
 type Response struct {
 	Message string
+}
+
+type CreateCommentDTO struct {
+	Slug   string `json:"slug" validate:"required"`
+	Body   string `json:"body" validate:"required"`
+	Author string `json:"author" validate:"required"`
+}
+
+func convertCreateCommentDtoToComment(c CreateCommentDTO) comment.Comment {
+	return comment.Comment{
+		Slug:   c.Slug,
+		Body:   c.Body,
+		Author: c.Author,
+	}
 }
 
 type CommentService interface {
@@ -38,20 +53,29 @@ func (h *Handler) GetComments(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) CreateComment(w http.ResponseWriter, r *http.Request) {
-	var cmt comment.Comment
+	var cmt CreateCommentDTO
 
 	if err := json.NewDecoder(r.Body).Decode(&cmt); err != nil {
 		return
 	}
 
-	cmt, err := h.Service.CreateComment(r.Context(), cmt)
+	validate := validator.New()
+	err := validate.Struct(cmt)
+	if err != nil {
+		http.Error(w, "not a valid comment", http.StatusBadRequest)
+		return
+	}
+
+	convertedCmt := convertCreateCommentDtoToComment(cmt)
+
+	createdCmt, err := h.Service.CreateComment(r.Context(), convertedCmt)
 	if err != nil {
 		log.Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	if err := json.NewEncoder(w).Encode(cmt); err != nil {
+	if err := json.NewEncoder(w).Encode(createdCmt); err != nil {
 		panic(err)
 	}
 }
