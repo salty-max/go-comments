@@ -29,11 +29,6 @@ func (d *Database) GetComments(ctx context.Context) ([]comment.Comment, error) {
 	var cmtRow CommentRow
 	var comments []comment.Comment
 
-	_, err := d.Client.ExecContext(ctx, `SELECT pg_sleep(16)`)
-	if err != nil {
-		return []comment.Comment{}, err
-	}
-
 	rows, err := d.Client.QueryContext(
 		ctx,
 		`

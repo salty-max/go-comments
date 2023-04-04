@@ -46,10 +46,10 @@ func (h *Handler) mapRoutes() {
 	})
 
 	h.Router.HandleFunc("/api/v1/comment", h.GetComments).Methods("GET")
-	h.Router.HandleFunc("/api/v1/comment", h.CreateComment).Methods("POST")
+	h.Router.HandleFunc("/api/v1/comment", JWTAuth(h.CreateComment)).Methods("POST")
 	h.Router.HandleFunc("/api/v1/comment/{id}", h.GetComment).Methods("GET")
-	h.Router.HandleFunc("/api/v1/comment/{id}", h.UpdateComment).Methods("PUT")
-	h.Router.HandleFunc("/api/v1/comment/{id}", h.DeleteComment).Methods("DELETE")
+	h.Router.HandleFunc("/api/v1/comment/{id}", JWTAuth(h.UpdateComment)).Methods("PUT")
+	h.Router.HandleFunc("/api/v1/comment/{id}", JWTAuth(h.DeleteComment)).Methods("DELETE")
 }
 
 func (h *Handler) Serve() error {
